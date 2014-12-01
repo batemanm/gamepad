@@ -1,3 +1,10 @@
+#include <SoftwareSerial.h>
+
+#define RXPIN 3
+#define TXPIN 2
+
+SoftwareSerial bt (RXPIN, TXPIN);
+
 #define RIGHT_RIGHT_PIN A1
 #define RIGHT_TOP_PIN A0
 #define RIGHT_LEFT_PIN 8
@@ -35,7 +42,12 @@ int lastButtonState = 0;
 int lastSent = 0;
 
 void setup() {
-    
+// bluetooth
+    pinMode (RXPIN, INPUT);
+    pinMode (TXPIN, OUTPUT);
+    bt.begin(9600);
+  
+//button
 //right 4
     pinMode(RIGHT_RIGHT_PIN, INPUT_PULLUP);     
     pinMode(RIGHT_TOP_PIN, INPUT_PULLUP);
@@ -51,20 +63,8 @@ void setup() {
     pinMode(LEFT_TOP_PIN, INPUT_PULLUP);
     pinMode(LEFT_LEFT_PIN, INPUT_PULLUP);     
     pinMode(LEFT_DOWN_PIN, INPUT_PULLUP);
-
-    Serial.begin(9600);
 }
 
-void printButtonState (int state){
-  for (int i = 0; i < sizeof(state) * 8; i ++){
-    if (state & (1 << i)) {
-      Serial.print ("1");
-    } else {
-      Serial.print ("0");
-    }
-  }
-  Serial.println ("");
-}
 
 void setButtonOn (int BUTTON, long time) {
 
@@ -98,7 +98,11 @@ void setButtonOff (int BUTTON, long time) {
 
 void getButtonStateToSend (int buttonState) {
   int toSend = 0;
+  int toSend2 = 0;
+  byte send1 = 0;
+  byte send2 = 0;
   boolean changed = 0;
+//  printButtonState (lastSent);
   for (int i = 0; i < sizeof (buttonState) *8; i ++) {
     if ((lastSent & (1 << i)) != (buttonState & (1 << i))) {
       changed = 1;
@@ -107,6 +111,12 @@ void getButtonStateToSend (int buttonState) {
   if (changed == 1) {
     toSend = buttonState;
     printButtonState (toSend);
+     send1 = byte (toSend);
+     toSend2 = toSend >> 8;
+     send2 = byte (toSend2);
+    bt.write (send1);
+    bt.write (send2);
+
     lastSent = toSend;
   }
 }
@@ -167,5 +177,4 @@ void loop(){
     setButtonOff (LEFT_DOWN, time);
   }
   getButtonStateToSend (buttonState);
-
 }
