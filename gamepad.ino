@@ -102,7 +102,6 @@ void getButtonStateToSend (int buttonState) {
   byte send1 = 0;
   byte send2 = 0;
   boolean changed = 0;
-//  printButtonState (lastSent);
   for (int i = 0; i < sizeof (buttonState) *8; i ++) {
     if ((lastSent & (1 << i)) != (buttonState & (1 << i))) {
       changed = 1;
@@ -110,7 +109,6 @@ void getButtonStateToSend (int buttonState) {
   }
   if (changed == 1) {
     toSend = buttonState;
-    printButtonState (toSend);
      send1 = byte (toSend);
      toSend2 = toSend >> 8;
      send2 = byte (toSend2);
